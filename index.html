@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2048 Mining App</title>
+    
+    <!-- Farcaster Quick Auth Performance Optimization -->
+    <link rel="preconnect" href="https://auth.farcaster.xyz" />
+
+    <!-- Farcaster Mini App Metadata -->
+    <meta property="fc:miniapp" content='{"version":"1","imageUrl":"https://2048-base.vercel.app/embed.png","button":{"title":"Play 2048 Mining","action":{"type":"launch_miniapp","name":"2048 Mining App","url":"https://2048-base.vercel.app/","splashImageUrl":"https://2048-base.vercel.app/logo128.png","splashBackgroundColor":"#1e293b"}}}' />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    background-image: url('/pattern.png');
+    background-repeat: repeat;
+    background-blend-mode: overlay;
+    background-attachment: fixed;
+  }
+  @keyframes tile-spawn {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes tile-merge {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-tile-spawn {
+    animation: tile-spawn 0.2s ease-in-out;
+  }
+
+  .animate-tile-merge {
+    animation: tile-merge 0.2s ease-in-out;
+    z-index: 20; /* Ensure merged tile is on top */
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@farcaster/miniapp-sdk": "https://aistudiocdn.com/@farcaster/miniapp-sdk@^0.2.0",
+    "@vercel/postgres": "https://aistudiocdn.com/@vercel/postgres@^0.10.0",
+    "next/": "https://aistudiocdn.com/next@^15.5.4/",
+    "@farcaster/quick-auth": "https://aistudiocdn.com/@farcaster/quick-auth@^0.0.8",
+    "vite": "https://aistudiocdn.com/vite@^7.1.9",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/vite@^5.0.4",
+    "fs": "https://aistudiocdn.com/fs@^0.0.1-security",
+    "url": "https://aistudiocdn.com/url@^0.11.4",
+    "ethers": "https://aistudiocdn.com/ethers@^6.13.1",
+    "wagmi": "https://aistudiocdn.com/wagmi@^2.16.3",
+    "viem": "https://aistudiocdn.com/viem@^2.21.57",
+    "@farcaster/miniapp-wagmi-connector": "https://aistudiocdn.com/@farcaster/miniapp-wagmi-connector@^1.1.0",
+    "@tanstack/react-query": "https://aistudiocdn.com/@tanstack/react-query@^5.51.1",
+    "viem/": "https://aistudiocdn.com/viem@^2.38.4/"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-800">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
