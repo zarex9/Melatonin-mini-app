@@ -1,84 +1,70 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 interface CountdownTimerProps {
-  targetDate?: string;
-  dailyResetUtc?: boolean;
+  targetDate?: string;       // e.g. "2025-12-30T18:30:00Z"
+  dailyResetUtc?: boolean;   // true = reset every UTC midnight
 }
 
-const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate, dailyResetUtc }) => {
-  const calculateTimeLeft = useCallback(() => {
+export default function CountdownTimer({ targetDate, dailyResetUtc }: CountdownTimerProps) {
+  const getTimeLeft = useMemo(() => {
     if (dailyResetUtc) {
-      const now = new Date();
-      // Calculate the next midnight UTC.
-      const tomorrowUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
-      const difference = tomorrowUtc.getTime() - now.getTime();
-      
-      let timeLeft: { hours?: number, minutes?: number } = {};
+      return () => {
+        const now = new Date();
+        const tomorrow = Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 1,
+          0, 0, 0
+        );
 
-      if (difference > 0) {
-        timeLeft = {
-          // Total hours until next midnight. Will be < 24.
-          hours: Math.floor(difference / (1000 * 60 * 60)),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
+        const diff = tomorrow - now.getTime();
+        if (diff <= 0) return { hours: 0, minutes: 0 };
+
+        return {
+          hours: Math.floor(diff / 36e5),
+          minutes: Math.floor((diff % 36e5) / 6e4),
         };
-      }
-      return timeLeft;
+      };
     }
 
     if (targetDate) {
-        const difference = +new Date(targetDate) - +new Date();
-        let timeLeft: { days?: number, hours?: number } = {};
+      const target = new Date(targetDate).getTime();
+      return () => {
+        const diff = target - Date.now();
+        if (diff <= 0) return { ended: true };
 
-        if (difference > 0) {
-          timeLeft = {
-            days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-            hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          };
-        }
-        return timeLeft;
+        return {
+          days: Math.floor(diff / 86400000),
+          hours: Math.floor((diff % 86400000) / 36e5),
+        };
+      };
     }
 
-    return {};
+    return () => ({});
   }, [dailyResetUtc, targetDate]);
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
 
   useEffect(() => {
-    // Update every second for higher accuracy when the minute ticks over.
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000); 
+    const interval = setInterval(() => setTimeLeft(getTimeLeft()), 60 * 1000);
+    setTimeLeft(getTimeLeft()); // immediate initial sync
+    return () => clearInterval(interval);
+  }, [getTimeLeft]);
 
-    return () => clearInterval(timer);
-  }, [calculateTimeLeft]);
+  /** ---------- RENDER ---------- */
 
-  // Render logic for daily reset timer
+  // DAILY UTC RESET
   if (dailyResetUtc) {
-    // FIX: Use `in` operator as a type guard to safely access properties on the union type.
-     if (!('minutes' in timeLeft) || timeLeft.hours === undefined || timeLeft.minutes === undefined) {
-         // Show a default before the first calculation or if time is up
-         return <span>00h 00m</span>;
-     }
-     const hours = String(timeLeft.hours).padStart(2, '0');
-     const minutes = String(timeLeft.minutes).padStart(2, '0');
-     return <span>{`${hours}h ${minutes}m`}</span>
-  }
-  
-  // Original render logic for fixed date timer
-  const timerComponents: string[] = [];
-  // FIX: Use `in` operator as a type guard to safely access properties on the union type.
-  if ('days' in timeLeft && timeLeft.days !== undefined) {
-      timerComponents.push(`${timeLeft.days}d`);
-  }
-  if (timeLeft.hours !== undefined) {
-      timerComponents.push(`${timeLeft.hours}h`);
+    const h = String(timeLeft.hours ?? 0).padStart(2, '0');
+    const m = String(timeLeft.minutes ?? 0).padStart(2, '0');
+    return <span>{`${h}h ${m}m`}</span>;
   }
 
-  return (
-    <span>
-      {timerComponents.length ? timerComponents.join(' ') : 'Ended'}
-    </span>
-  );
-};
+  // FIXED TARGET DATE COUNTDOWN
+  if ('ended' in timeLeft) return <span>Ended</span>;
 
-export default CountdownTimer;
+  const parts = [];
+  if (timeLeft.days !== undefined) parts.push(`${timeLeft.days}d`);
+  if (timeLeft.hours !== undefined) parts.push(`${timeLeft.hours}h`);
+  return <span>{parts.join(' ') || 'Ended'}</span>;
+}
