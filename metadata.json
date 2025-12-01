@@ -1,5 +1,5 @@
 {
   "name": "2048-miningapp",
-  "description": " 2048-style game with a crypto mining theme. Merge blocks to confirm transactions and achieve the highest hash rate, with on-chain leaderboards.",
+  "description": "A 2048-style game with a crypto mining theme. Merge blocks to confirm transactions and achieve the highest hash rate, with on-chain leaderboards.",
   "requestFramePermissions": []
 }
