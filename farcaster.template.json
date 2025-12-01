@@ -7,7 +7,7 @@
   "baseBuilder": {
     "allowedAddresses": "__VITE_ALLOWED_ADDRESSES__"
   },
-  "miniapp": {
+  "miiapp": {
     "version": "1",
     "name": "2048 Mining App",
     "homeUrl": "https://2048-base.vercel.app/",
