@@ -4,7 +4,7 @@ The Melatonin Mini App is a lightweight yet scalable Web3 front-end designed for
 
 Built For
 
-Ultra-fast development using Vit
+Ultra-fast development using Vite
 
 Native EVM wallet connections
 
