@@ -1,46 +1,22 @@
-Melatonin Mini App - Complete guide
+Overview
 
-A fast, modern, and mobile-optimized mini-application built using TypeScript + Vite + React + Wagmi (WalletConnect), with optional Farcaster Mini-App support.
+The Melatonin Mini App is a lightweight yet scalable Web3 front-end designed for seamless wallet connectivity and mobile performance.
 
-1. Overview
-
-The Melatonin Mini App is designed for:
-
-4
+Built For
 
 Ultra-fast development using Vite
 
-Native wallet connection (EVM chains)
+Native EVM wallet connections
 
-Mobile-first layout
+Mobile-first responsive UlI
 
-Optional Farcaster mini-app compatibility
+Optional Farcaster Mini-App compatibility
 
-Clean, modular TypeScript architecture
+Clean & modular TypeScript architecture
 
-Repository structure is optimized for scalability and custom features.
+The repository is structured for scalability, ease of maintenance, and custom feature expansion.
 
-2. Project Structure
-
-Melatonin-mini-app/
-
-# API helpers
-
-api/
-
-components/
-
-constants/
-
-configs
-
-hooks/
-
-public/
-
-scripts/
-
-# Project Structure 
+##Project Structure##
 Melatonin-mini-app/
 │
 ├── api/                 # API helpers (on-chain/off-chain data)
@@ -63,92 +39,57 @@ Melatonin-mini-app/
 │
 └── package.json          # Dependencies and scripts
 
-# Static values and chain
-
-App.tex
-
-index.tsx
-
-# Custom React hooks # Icons and static assets # Utility scripts # Helper functions
-
-# Main application # ReactDOM mount point
-
-farcaster.template.json #Template for Farcaster
-
-mini-app
-
-metadata.json
-
-# Mini-app metadata
-
-package.json
-
-wagmiConfig.ts
-
-vite.config.ts
-
-tsconfig.json
-
-# Dependencies
-
-# Wallet config
-
-#Vite config
-
-# TypeScript config
 Installation
 
-Clone the repository:
-
-Copy code
-
+Clone the repository and install dependencies:
 git clone https://github.com/zarex9/Melatonin-mini-app.git
-
-Install all dependencies:
-
+cd Melatonin-mini-app
 npm install
 
-Start the development server
+npm run dev
 
-4. Wallet Integration (Wagmi + WalletConnect)
+Wallet Integration (Wagmi + WalletConnect)
 
-The project includes pre-configured wallet setup using Wagmi.
+The app includes a pre-configured wallet setup using Wagmi and WalletConnect.
 
-To add chains:
+To add or modify supported chains, update your config:
 
-Ts
-
-Copy code
-
+// wagmiConfig.ts
 import { base, arbitrum, polygon } from "wagmi/chains";
+import { createConfig } from "wagmi";
 
-export const config = createConfig({ chains: [base, arbitrum, polygon],
-
+export const config = createConfig({
+  chains: [base, arbitrum, polygon],
+  // connectors, transports, etc.
 });
 
-The connection Ul appears through your components, and state is handled in wagmiConfig.ts.
 Farcaster Mini-App Support
 
-Two files make the app compatible with Farcaster:
+The project is Farcaster-ready out of the box. Two key files handle mini-app compatibility:
 
 metadata.json
-
+{
+  "name": "Melatonin Mini App",
+  "description": "A lightweight Web3 mini app built by zarex9.",
+  "icon": "/icon.png",
+  "screens": [
+    { "path": "/", "title": "Home" }
+  ]
 }
 
-Copy code
+Developer Notes
 
-{
+Built in TypeScript for type safety and modularity.
 
-"name": "Melatonin Mini App", "description": "A lightweight Web3 mini app built by zarex9.",
+Uses Vite for blazing-fast builds.
 
-"icon": "/icon.png",
+Integrates Wagmi hooks for wallet + network management.
 
-"screens": [
+Structured for multi-chain scalability and Farcaster integration.
 
-{ "path": "/", "title": "Home" }
 
-]
-
-farcaster.template.json
-
-Used when packaging the build for Farcaster mini-app deployment.
+Maintained By
+zarex9
+Full-Stack Web3 Developer
+GitHub Farcaster
+MIT License 2025 zarex9
