@@ -1,7 +1,7 @@
 
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { sdk } from '@farcaster/miniapp-sdk';
+import { sdk } from '@farcaster/miniapp-sd';
 import { useGameLogic } from './hooks/useGameLogic';
 import GameBoard from './components/GameBoard';
 import GameControls from './components/GameControls';
