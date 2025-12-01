@@ -5,7 +5,7 @@ export interface TileData {
   /** Unique tile ID */
   id: number;
 
-  /** Tile value (2, 4, , ...) */
+  /** Tile value (2, 4, 8, ...) */
   value: number;
 
   /** Tile row index */
