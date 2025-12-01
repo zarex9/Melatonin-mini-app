@@ -9,7 +9,7 @@
   },
   "miniapp": {
     "version": "1",
-    "name": "2048 Mining App",
+    "name": "2048 Mining pp",
     "homeUrl": "https://2048-base.vercel.app/",
     "iconUrl": "https://2048-base.vercel.app/logo128.png",
     "splashImageUrl": "https://2048-base.vercel.app/logo128.png",
