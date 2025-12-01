@@ -1,9 +1,32 @@
+# Normalize line endings for all text files
 * text=auto eol=lf
+
+# Source code files are text
+*.js text diff=javascript
+*.ts text diff=typescript
+*.mjs text
+*.cjs text
+*.json text
+*.md text
+*.env text
+
+# Lock files - don't alter line endings
+package-lock.json -text
+pnpm-lock.yaml -text
+yarn.lock -text
+
+# Generated files - mark as vendored (ignored by GitHub linguist)
+public/.well-known/farcaster.json linguist-generated=true
+
+# Binary assets
 *.png binary
 *.jpg binary
 *.jpeg binary
 *.gif binary
-*.webp binary
 *.svg binary
+*.webp binary
 *.mp4 binary
-*.mp3 binary
+*.ico binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
