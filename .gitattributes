@@ -1,7 +1,7 @@
 # Normalize line endings for all text files
 * text=auto eol=lf
 
-# Source code files are 
+# Source code files are text
 *.js text diff=javascript
 *.ts text diff=typescript
 *.mjs text
@@ -30,4 +30,5 @@ public/.well-known/farcaster.json linguist-generated=true
 *.ttf binary
 *.woff binary
 *.woff2 binary
+
 
