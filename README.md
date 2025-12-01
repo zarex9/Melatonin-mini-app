@@ -1,4 +1,4 @@
-Melatonin Mini App - Complete Developer Guide
+Melatonin Mini App - Complete guide
 
 A fast, modern, and mobile-optimized mini-application built using TypeScript + Vite + React + Wagmi (WalletConnect), with optional Farcaster Mini-App support.
 
@@ -40,7 +40,28 @@ public/
 
 scripts/
 
-# Ul components
+# Project Structure 
+Melatonin-mini-app/
+│
+├── api/                 # API helpers (on-chain/off-chain data)
+├── components/          # Reusable UI components
+├── constants/           # Static values (addresses, labels)
+├── configs/             # App configs (chains, environments)
+├── hooks/               # Custom React hooks
+├── public/              # Icons, assets, and favicon
+├── scripts/             # Utility build/deploy scripts
+│
+├── App.tsx              # Root application
+├── index.tsx            # ReactDOM mount point
+│
+├── farcaster.template.json   # Farcaster build template
+├── metadata.json             # Mini-app metadata (name, icon, screens)
+│
+├── wagmiConfig.ts        # Wallet connection setup (Wagmi)
+├── vite.config.ts        # Vite configuration
+├── tsconfig.json         # TypeScript configuration
+│
+└── package.json          # Dependencies and scripts
 
 # Static values and chain
 
