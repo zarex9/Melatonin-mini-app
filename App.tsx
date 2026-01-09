@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { useGameLogic } from './hooks/useGameLogic';
 import GameBoard from './components/GameBoard';
-import GameControls from './components/GameContrls';
+import GameControls from './components/GameControls';
 import GameOver from './components/GameOver';
 import Tabs from './components/Tabs';
 import Leaderboard from './components/Leaderboard';
