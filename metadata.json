@@ -1,5 +1,24 @@
 {
-  "name": "2048-miningapp",
-  "description": "A 2048-style game with a crypto mining theme. Merge blocks to confirm transactions and achieve the highest hash rate, with on-chain leaderboards.",
-  "requestFramePermissions": []
+  "name": "2048 Mining",
+  "shortName": "2048 Mining",
+  "version": "0.1.0",
+  "description": "A 2048-style game with a crypto mining theme. Merge blocks to confirm transactions, boost your hash rate, and compete on on-chain leaderboards.",
+  "author": "Your Name / Studio",
+  "homepage": "https://your-app-url.com",
+  "icon": "/icon.png",
+  "tags": ["game", "2048", "crypto", "mining", "onchain"],
+  "network": "ethereum",
+  "requestFramePermissions": [
+    "wallet",
+    "publicKey"
+  ],
+  "screenshots": [
+    "/screenshots/1.png",
+    "/screenshots/2.png"
+  ],
+  "legal": {
+    "privacyPolicy": "https://your-app-url.com/privacy",
+    "termsOfService": "https://your-app-url.com/terms"
+  }
 }
+
