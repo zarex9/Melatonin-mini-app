@@ -15,7 +15,7 @@
     "splashImageUrl": "https://2048-base.vercel.app/logo128.png",
     "splashBackgroundColor": "#1e293b",
     "subtitle": "A crypto-themed 2048 puzzle.",
-    "description": "Merge blocks to confirm transactions, increase your hash rate, and cmpete on the on-chain leaderboards.",
+    "description": "Merge blocks to confirm transactions, increase your hash rate, and compete on the on-chain leaderboards.",
     "screenshotUrls": [
       "https://2048-base.vercel.app/embed.png"
     ],
