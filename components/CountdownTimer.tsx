@@ -5,7 +5,7 @@ interface CountdownTimerProps {
   dailyResetUtc?: boolean;   // true = reset every UTC midnight
 }
 
-export default function CountdownTimer({ targetDate, dailyResetUtc }: CountdownTimerProps) {
+export default function CountdownTimer({ targetDate, dailyResetUtc }: CountdownTimerProp) {
   const getTimeLeft = useMemo(() => {
     if (dailyResetUtc) {
       return () => {
