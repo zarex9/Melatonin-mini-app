@@ -1,7 +1,7 @@
 
 
 
-import { createPublicClient, http, defineChain, type Chain, type Abi } from 'vem';
+import { createPublicClient, http, defineChain, type Chain, type Abi } from 'viem';
 import { getAbiForVersion } from '../constants/contract.js';
 import { createClient, Errors } from '@farcaster/quick-auth';
 import type { SeasonInfo } from '../types';
