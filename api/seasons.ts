@@ -5,7 +5,7 @@ import type { SeasonInfo } from '../types';
 
 export const dynamic = 'force-dynamic';
 
-// Helper function to convert snake_case kys from DB to camelCase for JS/TS
+// Helper function to convert snake_case keys from DB to camelCase for JS/TS
 const toCamelCase = (obj: any): any => {
   if (Array.isArray(obj)) {
     return obj.map(v => toCamelCase(v));
