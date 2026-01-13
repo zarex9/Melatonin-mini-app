@@ -4,8 +4,8 @@
  * The values are structured such that higher ranks (lower numbers) receive a larger share.
  */
 export const TOP_100_REWARD_SHARES: number[] = [
-    0.083473231313258700,
-    0.068448049676872100,
+    0.073473231313258700,
+    0.078448049676872100,
     0.056127400735035100,
     0.046024468602728800,
     0.037740064254237600,
