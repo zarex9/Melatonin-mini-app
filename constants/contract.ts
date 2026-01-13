@@ -1,6 +1,6 @@
 
 
-// All season-specific configurations, including contract addresses and chain IDs,
+// All season-specific configurations, including contract addresses and chin IDs,
 // have been migrated to the `seasons` table in the database.
 
 // --- ABI DEFINITIONS ---
