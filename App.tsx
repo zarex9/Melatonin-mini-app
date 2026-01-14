@@ -5,6 +5,7 @@ import { sdk } from '@farcaster/miniapp-sdk';
 import { useGameLogic } from './hooks/useGameLogic';
 import GameBoard from './components/GameBoard';
 import GameControls from './components/GameControls';
+import MoveHistory from './components/MoveHistory';
 import GameOver from './components/GameOver';
 import Tabs from './components/Tabs';
 import Leaderboard from './components/Leaderboard';
@@ -81,15 +82,19 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
     };
   }, [handleGlobalKeyDown]);
 
-  // Attach undo to global window for shortcut access
+  // Attach undo/redo to global window for shortcut access
   useEffect(() => {
     // @ts-ignore
     (window as any).appUndo = undo;
+    // @ts-ignore
+    (window as any).appRedo = redo;
     return () => {
       // @ts-ignore
       (window as any).appUndo = undefined;
+      // @ts-ignore
+      (window as any).appRedo = undefined;
     };
-  }, [undo]);
+  }, [undo, redo]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
@@ -142,6 +147,7 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
         <GameControls score={score} bestScore={displayBestScore} onNewGame={newGame} onUndo={undo} undoDisabled={!undoAvailable} onRedo={redo} redoDisabled={!redoAvailable} moves={moves.length} />
         <div className="relative w-full">
           <GameBoard tiles={tiles} />
+          <MoveHistory moves={moves} />
           {isGameOver && (
             <GameOver 
               score={score} 

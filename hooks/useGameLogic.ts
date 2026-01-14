@@ -607,8 +607,17 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     const isUndoShortcut = (e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z');
     if (isUndoShortcut) {
       e.preventDefault();
-      // @ts-ignore - undo is defined below in the hook
+      // @ts-ignore - appUndo attached in App
       if (typeof (window as any).appUndo === 'function') (window as any).appUndo();
+      return;
+    }
+
+    // Ctrl/Cmd+Y or Ctrl/Cmd+Shift+Z for redo
+    const isRedoShortcut = (e.ctrlKey || e.metaKey) && (e.key === 'y' || ((e.key === 'Z' || e.key === 'z') && e.shiftKey));
+    if (isRedoShortcut) {
+      e.preventDefault();
+      // @ts-ignore - appRedo attached in App
+      if (typeof (window as any).appRedo === 'function') (window as any).appRedo();
       return;
     }
 
