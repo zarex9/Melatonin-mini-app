@@ -6,6 +6,7 @@ interface GameControlsProps {
   onNewGame: () => void;
   onUndo?: () => void;
   undoDisabled?: boolean;
+  moves?: number;
 }
 
 const ScoreBox: React.FC<{ title: string; score: number }> = ({ title, score }) => (
@@ -26,6 +27,7 @@ const GameControls: React.FC<GameControlsProps> = ({ score, bestScore, onNewGame
       </button>
       <ScoreBox title="Hashrate" score={score} />
       <ScoreBox title="Peak Rate" score={bestScore} />
+      {typeof moves === 'number' && <ScoreBox title="Moves" score={moves} />}
       <button
         onClick={onUndo}
         disabled={undoDisabled}

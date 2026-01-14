@@ -545,5 +545,5 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
 
   const undoAvailable = !!prevState && !isMoving;
 
-  return { tiles, score, bestScore, serverBestScore, isGameOver, isWon, newGame, handleKeyDown, performMove, submitScore, isSubmitting, hasSubmittedScore, wasNewBestScore, userRank, isInitializing, userAddress, submissionStatus, undo, undoAvailable };
+  return { tiles, score, bestScore, serverBestScore, isGameOver, isWon, newGame, handleKeyDown, performMove, submitScore, isSubmitting, hasSubmittedScore, wasNewBestScore, userRank, isInitializing, userAddress, submissionStatus, undo, undoAvailable, moves };
 };

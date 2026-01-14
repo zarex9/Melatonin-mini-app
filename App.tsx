@@ -125,7 +125,7 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <GameControls score={score} bestScore={displayBestScore} onNewGame={newGame} onUndo={undo} undoDisabled={!undoAvailable} />
+        <GameControls score={score} bestScore={displayBestScore} onNewGame={newGame} onUndo={undo} undoDisabled={!undoAvailable} moves={moves.length} />
         <div className="relative w-full">
           <GameBoard tiles={tiles} />
           {isGameOver && (
