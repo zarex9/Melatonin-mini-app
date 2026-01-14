@@ -6,6 +6,8 @@ interface GameControlsProps {
   onNewGame: () => void;
   onUndo?: () => void;
   undoDisabled?: boolean;
+  onRedo?: () => void;
+  redoDisabled?: boolean;
   moves?: number;
 }
 
@@ -34,6 +36,13 @@ const GameControls: React.FC<GameControlsProps> = ({ score, bestScore, onNewGame
         className={undoDisabled ? "bg-slate-500 text-slate-400 font-bold py-2 px-4 rounded-lg cursor-not-allowed h-12 flex items-center" : "bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 h-12 flex items-center"}
       >
         Undo
+      </button>
+      <button
+        onClick={onRedo}
+        disabled={redoDisabled}
+        className={redoDisabled ? "bg-slate-500 text-slate-400 font-bold py-2 px-4 rounded-lg cursor-not-allowed h-12 flex items-center" : "bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 h-12 flex items-center"}
+      >
+        Redo
       </button>
       <button
         onClick={onNewGame}

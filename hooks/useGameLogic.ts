@@ -59,6 +59,21 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     finalMovesHash: string;
     moves: number[];
   } | null>(null);
+
+  // Multi-step undo/redo stacks
+  const DEFAULT_UNDO_DEPTH = 5;
+  const [undoDepth, setUndoDepth] = useState<number>(() => {
+    try {
+      const raw = localStorage.getItem('settings');
+      if (!raw) return DEFAULT_UNDO_DEPTH;
+      const parsed = JSON.parse(raw);
+      return parsed?.undoDepth ?? DEFAULT_UNDO_DEPTH;
+    } catch { return DEFAULT_UNDO_DEPTH; }
+  });
+
+  const [undoStack, setUndoStack] = useState<Array<{ tiles: TileData[]; score: number; finalMovesHash: string; moves: number[] }>>([]);
+  const [redoStack, setRedoStack] = useState<Array<{ tiles: TileData[]; score: number; finalMovesHash: string; moves: number[] }>>([]);
+
   const [prng, setPrng] = useState<SeededRandom | null>(null);
   
   const { address: wagmiAddress, isConnected, chain } = useAccount();
@@ -474,8 +489,15 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     const { newTiles, mergedTiles, scoreIncrease, hasMoved } = move(tiles, direction);
     
     if (hasMoved) {
-        // Save previous state to allow undoing this move
-        setPrevState({ tiles: tiles.map(t => ({ ...t })), score, finalMovesHash, moves: [...moves] });
+        // Save previous state to allow undoing this move (push to undo stack)
+        const snapshot = { tiles: tiles.map(t => ({ ...t })), score, finalMovesHash, moves: [...moves] };
+        setPrevState(snapshot);
+        setUndoStack(prev => {
+          const next = [snapshot, ...prev].slice(0, undoDepth);
+          return next;
+        });
+        // Clear redo stack on new move
+        setRedoStack([]);
 
         setIsMoving(true);
         setScore(prev => prev + scoreIncrease);
@@ -513,25 +535,62 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
   }, [tiles, isGameOver, isMoving, isWon, prng, finalMovesHash, moves]);
 
   const undo = useCallback(() => {
-    if (isMoving || !prevState) return;
+    if (isMoving || undoStack.length === 0) return;
     if (moveTimeoutRef.current) {
       clearTimeout(moveTimeoutRef.current);
       moveTimeoutRef.current = null;
     }
 
-    setTiles(prevState.tiles);
-    setScore(prevState.score);
-    setFinalMovesHash(prevState.finalMovesHash);
-    setMoves(prevState.moves);
-    setPrevState(null);
+    // Pop last snapshot
+    setUndoStack(prev => {
+      const [last, ...rest] = prev;
+      if (!last) return prev;
+      // push current state onto redo stack
+      setRedoStack(rs => [{ tiles: tiles.map(t => ({ ...t })), score, finalMovesHash, moves: [...moves] }, ...rs].slice(0, undoDepth));
 
-    // Update win / game over state according to restored board
-    setIsWon(prevState.tiles.some(tile => tile.value === 2048));
-    setIsGameOver(checkIsGameOver(prevState.tiles));
+      setTiles(last.tiles);
+      setScore(last.score);
+      setFinalMovesHash(last.finalMovesHash);
+      setMoves(last.moves);
 
-    // Expose to window temporarily for keyboard shortcut
-    // We'll set it on mount so the app can call window.appUndo() from global key handler
-  }, [isMoving, prevState]);
+      setPrevState(null);
+
+      // Update win / game over
+      setIsWon(last.tiles.some(tile => tile.value === 2048));
+      setIsGameOver(checkIsGameOver(last.tiles));
+
+      return rest;
+    });
+  }, [isMoving, undoStack, tiles, score, finalMovesHash, moves, undoDepth]);
+
+  const redo = useCallback(() => {
+    if (isMoving || redoStack.length === 0) return;
+    if (moveTimeoutRef.current) {
+      clearTimeout(moveTimeoutRef.current);
+      moveTimeoutRef.current = null;
+    }
+
+    setRedoStack(prev => {
+      const [last, ...rest] = prev;
+      if (!last) return prev;
+      // push current state onto undo stack
+      setUndoStack(us => [{ tiles: tiles.map(t => ({ ...t })), score, finalMovesHash, moves: [...moves] }, ...us].slice(0, undoDepth));
+
+      setTiles(last.tiles);
+      setScore(last.score);
+      setFinalMovesHash(last.finalMovesHash);
+      setMoves(last.moves);
+
+      setPrevState(null);
+
+      // Update win / game over
+      setIsWon(last.tiles.some(tile => tile.value === 2048));
+      setIsGameOver(checkIsGameOver(last.tiles));
+
+      return rest;
+    });
+  }, [isMoving, redoStack, tiles, score, finalMovesHash, moves, undoDepth]);
+
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     // Support arrow keys for moves
@@ -558,7 +617,17 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     performMove(direction);
   }, [performMove]);
 
-  const undoAvailable = !!prevState && !isMoving;
+  const undoAvailable = undoStack.length > 0 && !isMoving;
+  const redoAvailable = redoStack.length > 0 && !isMoving;
 
-  return { tiles, score, bestScore, serverBestScore, isGameOver, isWon, newGame, handleKeyDown, performMove, submitScore, isSubmitting, hasSubmittedScore, wasNewBestScore, userRank, isInitializing, userAddress, submissionStatus, undo, undoAvailable, moves };
+  const setGlobalSettings = (settings: { undoDepth?: number }) => {
+    const raw = localStorage.getItem('settings');
+    let parsed = {} as any;
+    try { parsed = raw ? JSON.parse(raw) : {}; } catch {}
+    const merged = { ...parsed, ...settings };
+    localStorage.setItem('settings', JSON.stringify(merged));
+    if (settings.undoDepth !== undefined) setUndoDepth(settings.undoDepth);
+  };
+
+  return { tiles, score, bestScore, serverBestScore, isGameOver, isWon, newGame, handleKeyDown, performMove, submitScore, isSubmitting, hasSubmittedScore, wasNewBestScore, userRank, isInitializing, userAddress, submissionStatus, undo, undoAvailable, redo, redoAvailable, moves, undoDepth, setGlobalSettings };
 };
