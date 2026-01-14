@@ -528,17 +528,32 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     // Update win / game over state according to restored board
     setIsWon(prevState.tiles.some(tile => tile.value === 2048));
     setIsGameOver(checkIsGameOver(prevState.tiles));
+
+    // Expose to window temporarily for keyboard shortcut
+    // We'll set it on mount so the app can call window.appUndo() from global key handler
   }, [isMoving, prevState]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Support arrow keys for moves
     let direction: 'up' | 'down' | 'left' | 'right' | null = null;
     switch (e.key) {
       case 'ArrowUp': direction = 'up'; break;
       case 'ArrowDown': direction = 'down'; break;
       case 'ArrowLeft': direction = 'left'; break;
       case 'ArrowRight': direction = 'right'; break;
-      default: return;
+      default: break;
     }
+
+    // Ctrl/Cmd+Z for undo
+    const isUndoShortcut = (e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z');
+    if (isUndoShortcut) {
+      e.preventDefault();
+      // @ts-ignore - undo is defined below in the hook
+      if (typeof (window as any).appUndo === 'function') (window as any).appUndo();
+      return;
+    }
+
+    if (!direction) return;
     e.preventDefault();
     performMove(direction);
   }, [performMove]);

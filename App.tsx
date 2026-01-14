@@ -77,6 +77,16 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
     };
   }, [handleGlobalKeyDown]);
 
+  // Attach undo to global window for shortcut access
+  useEffect(() => {
+    // @ts-ignore
+    (window as any).appUndo = undo;
+    return () => {
+      // @ts-ignore
+      (window as any).appUndo = undefined;
+    };
+  }, [undo]);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
