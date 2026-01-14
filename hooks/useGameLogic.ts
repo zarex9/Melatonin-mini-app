@@ -53,6 +53,12 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
   const [startTime, setStartTime] = useState<number | null>(null);
   const [moves, setMoves] = useState<number[]>([]);
   const [finalMovesHash, setFinalMovesHash] = useState<string>(INITIAL_MOVES_HASH);
+  const [prevState, setPrevState] = useState<{
+    tiles: TileData[];
+    score: number;
+    finalMovesHash: string;
+    moves: number[];
+  } | null>(null);
   const [prng, setPrng] = useState<SeededRandom | null>(null);
   
   const { address: wagmiAddress, isConnected, chain } = useAccount();
@@ -172,6 +178,8 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     setPrng(null);
     setRandomness(null);
     setFinalMovesHash(INITIAL_MOVES_HASH);
+    // Clear undo/previous state when starting a fresh game
+    setPrevState(null);
     
     newGameLoadingRef.current = true;
     setIsMoving(true);
@@ -466,6 +474,9 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     const { newTiles, mergedTiles, scoreIncrease, hasMoved } = move(tiles, direction);
     
     if (hasMoved) {
+        // Save previous state to allow undoing this move
+        setPrevState({ tiles: tiles.map(t => ({ ...t })), score, finalMovesHash, moves: [...moves] });
+
         setIsMoving(true);
         setScore(prev => prev + scoreIncrease);
         setTiles([...newTiles, ...mergedTiles]);
@@ -499,7 +510,25 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
           if (checkIsGameOver(finalTiles)) setIsGameOver(true);
         }, ANIMATION_DURATION);
     }
-  }, [tiles, isGameOver, isMoving, isWon, prng, finalMovesHash]);
+  }, [tiles, isGameOver, isMoving, isWon, prng, finalMovesHash, moves]);
+
+  const undo = useCallback(() => {
+    if (isMoving || !prevState) return;
+    if (moveTimeoutRef.current) {
+      clearTimeout(moveTimeoutRef.current);
+      moveTimeoutRef.current = null;
+    }
+
+    setTiles(prevState.tiles);
+    setScore(prevState.score);
+    setFinalMovesHash(prevState.finalMovesHash);
+    setMoves(prevState.moves);
+    setPrevState(null);
+
+    // Update win / game over state according to restored board
+    setIsWon(prevState.tiles.some(tile => tile.value === 2048));
+    setIsGameOver(checkIsGameOver(prevState.tiles));
+  }, [isMoving, prevState]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     let direction: 'up' | 'down' | 'left' | 'right' | null = null;
@@ -514,5 +543,7 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     performMove(direction);
   }, [performMove]);
 
-  return { tiles, score, bestScore, serverBestScore, isGameOver, isWon, newGame, handleKeyDown, performMove, submitScore, isSubmitting, hasSubmittedScore, wasNewBestScore, userRank, isInitializing, userAddress, submissionStatus };
+  const undoAvailable = !!prevState && !isMoving;
+
+  return { tiles, score, bestScore, serverBestScore, isGameOver, isWon, newGame, handleKeyDown, performMove, submitScore, isSubmitting, hasSubmittedScore, wasNewBestScore, userRank, isInitializing, userAddress, submissionStatus, undo, undoAvailable };
 };

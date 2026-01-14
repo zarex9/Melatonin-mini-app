@@ -44,7 +44,9 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
     wasNewBestScore,
     userRank,
     isInitializing,
-    submissionStatus
+    submissionStatus,
+    undo,
+    undoAvailable
   } = useGameLogic(!!activeSeason, activeSeason);
   
   const { data: leaderboardData, isLoading: isLeaderboardLoading } = useLeaderboard(!!activeSeason, activeSeason?.id || null);
@@ -123,7 +125,7 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <GameControls score={score} bestScore={displayBestScore} onNewGame={newGame} />
+        <GameControls score={score} bestScore={displayBestScore} onNewGame={newGame} onUndo={undo} undoDisabled={!undoAvailable} />
         <div className="relative w-full">
           <GameBoard tiles={tiles} />
           {isGameOver && (
