@@ -6,6 +6,7 @@ import { useGameLogic } from './hooks/useGameLogic';
 import GameBoard from './components/GameBoard';
 import GameControls from './components/GameControls';
 import MoveHistory from './components/MoveHistory';
+import Toast from './components/Toast';
 import GameOver from './components/GameOver';
 import Tabs from './components/Tabs';
 import Leaderboard from './components/Leaderboard';
@@ -82,17 +83,23 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
     };
   }, [handleGlobalKeyDown]);
 
-  // Attach undo/redo to global window for shortcut access
+  // Attach undo/redo and showToast to global window for shortcut & toast access
   useEffect(() => {
     // @ts-ignore
     (window as any).appUndo = undo;
     // @ts-ignore
     (window as any).appRedo = redo;
+    // @ts-ignore
+    (window as any).appShowToast = (message: string, type: 'info' | 'success' | 'error' = 'info') => {
+      showToast(message, type);
+    };
     return () => {
       // @ts-ignore
       (window as any).appUndo = undefined;
       // @ts-ignore
       (window as any).appRedo = undefined;
+      // @ts-ignore
+      (window as any).appShowToast = undefined;
     };
   }, [undo, redo]);
 
@@ -120,6 +127,14 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
   };
   
   const displayBestScore = serverBestScore !== null ? serverBestScore : bestScore;
+
+  // Toasts
+  const [toasts, setToasts] = React.useState<{ id: string; message: string; type?: 'info' | 'success' | 'error' }[]>([]);
+  const showToast = (message: string, type: 'info' | 'success' | 'error' = 'info') => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    setToasts(t => [...t, { id, message, type }]);
+  };
+  const dismissToast = (id: string) => setToasts(t => t.filter(x => x.id !== id));
 
   if (!activeSeason) {
     return (
@@ -161,6 +176,7 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
             />
           )}
         </div>
+        <Toast toasts={toasts} onDismiss={dismissToast} />
       </div>
     );
   }

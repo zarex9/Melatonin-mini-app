@@ -45,6 +45,38 @@ const GameControls: React.FC<GameControlsProps> = ({ score, bestScore, onNewGame
         Redo
       </button>
       <button
+        onClick={() => {
+          const text = `My score: ${score}`;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+              // @ts-ignore
+              if (typeof (window as any).appShowToast === 'function') (window as any).appShowToast('Score copied to clipboard', 'success');
+            }).catch(() => {
+              // @ts-ignore
+              if (typeof (window as any).appShowToast === 'function') (window as any).appShowToast('Failed to copy', 'error');
+            });
+          } else {
+            // fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+              document.execCommand('copy');
+              // @ts-ignore
+              if (typeof (window as any).appShowToast === 'function') (window as any).appShowToast('Score copied to clipboard', 'success');
+            } catch (e) {
+              // @ts-ignore
+              if (typeof (window as any).appShowToast === 'function') (window as any).appShowToast('Failed to copy', 'error');
+            }
+            textarea.remove();
+          }
+        }}
+        className="bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 h-12 flex items-center"
+      >
+        Share
+      </button>
+      <button
         onClick={onNewGame}
         className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 h-12 flex items-center"
       >
