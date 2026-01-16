@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React from 'reac';
 import ReactDOM from 'react-dom/client';
 import AppWrapper from './App';
 
