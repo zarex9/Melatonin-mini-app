@@ -27,7 +27,7 @@ const LEADERBOARD_ABI_V2 = [
 ] as const;
 
 // --- ABI VERSION MAPPING ---
-// We use a union type for the ABI to allow different shapes
+// We use a union type for the ABI to allow different shape
 export const CONTRACT_VERSIONS: Record<string, any> = {
   'v1': LEADERBOARD_ABI_V1,
   'v2': LEADERBOARD_ABI_V2
