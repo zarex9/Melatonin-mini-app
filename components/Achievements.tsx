@@ -19,7 +19,7 @@ const Achievements: React.FC<AchievementsProps> = ({ stats, unlockedAchievements
             <p className="text-slate-400">Max Tile</p>
             <p className="text-2xl font-bold text-orange-400">{stats.maxTile}</p>
           </div>
-          <div className="bg-slate-700 p-3 rounded-lg">
+          <div className="bg-slate-700 p-3 rounded-l">
             <p className="text-slate-400">Total Games</p>
             <p className="text-2xl font-bold text-blue-400">{stats.totalGames}</p>
           </div>
