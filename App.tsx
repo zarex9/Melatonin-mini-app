@@ -10,6 +10,8 @@ import Toast from './components/Toast';
 import GameOver from './components/GameOver';
 import Tabs from './components/Tabs';
 import Leaderboard from './components/Leaderboard';
+import Achievements from './components/Achievements';
+import ThemeSelector from './components/ThemeSelector';
 import SeasonSelector from './components/SeasonSelector';
 import RewardsDisplay from './components/RewardsDisplay';
 import { useAccount, useSwitchChain, useConnect, WagmiProvider } from 'wagmi';
@@ -20,12 +22,28 @@ import { TOP_100_REWARD_SHARES } from './constants/rewards';
 import InfoDisplay from './components/InfoDisplay';
 import CountdownTimer from './components/CountdownTimer';
 import type { SeasonInfo } from './types';
+import { THEMES, Theme } from './constants/themes';
 
 const queryClient = new QueryClient();
 
 const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefined, onSeasonChange: (id: string) => void }> = ({ seasons, activeSeason, onSeasonChange }) => {
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
-  const [activeTab, setActiveTab] = useState<'mining' | 'stats'>('mining');
+  const [activeTab, setActiveTab] = useState<'mining' | 'stats' | 'achievements'>('mining');
+  const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
+    try {
+      const saved = localStorage.getItem('melatonin_theme');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return THEMES.find(t => t.id === parsed.id) || THEMES[0];
+      }
+    } catch {}
+    return THEMES[0];
+  });
+
+  const handleThemeChange = (theme: Theme) => {
+    setCurrentTheme(theme);
+    localStorage.setItem('melatonin_theme', JSON.stringify({ id: theme.id }));
+  };
   
   const { isConnected, chain, status: wagmiStatus } = useAccount();
   const { connect, connectors } = useConnect();
@@ -51,8 +69,11 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
     undoAvailable,
     redo,
     redoAvailable,
+    moves,
     undoDepth,
-    setGlobalSettings
+    setGlobalSettings,
+    stats,
+    unlockedAchievements
   } = useGameLogic(!!activeSeason, activeSeason);
   
   const { data: leaderboardData, isLoading: isLeaderboardLoading } = useLeaderboard(!!activeSeason, activeSeason?.id || null);
@@ -161,7 +182,7 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
       >
         <GameControls score={score} bestScore={displayBestScore} onNewGame={newGame} onUndo={undo} undoDisabled={!undoAvailable} onRedo={redo} redoDisabled={!redoAvailable} moves={moves.length} />
         <div className="relative w-full">
-          <GameBoard tiles={tiles} />
+          <GameBoard tiles={tiles} theme={currentTheme} />
           <MoveHistory moves={moves} />
           {isGameOver && (
             <GameOver 
@@ -255,9 +276,16 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
           </div>
         </div>
         <main className="flex-grow flex flex-col w-full items-center justify-center">
-          {activeTab === 'mining' 
-            ? renderGameContent() 
-            : <Leaderboard isReady={!!activeSeason} activeSeasonId={activeSeason.id} />}
+          {activeTab === 'mining' && (
+            <>
+              {renderGameContent()}
+              <div className="mt-8 w-full">
+                <ThemeSelector currentThemeId={currentTheme.id} onThemeChange={handleThemeChange} />
+              </div>
+            </>
+          )}
+          {activeTab === 'stats' && <Leaderboard isReady={!!activeSeason} activeSeasonId={activeSeason.id} />}
+          {activeTab === 'achievements' && <Achievements stats={stats} unlockedAchievements={unlockedAchievements} />}
         </main>
       </div>
     </div>

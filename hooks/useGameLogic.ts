@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useSwitchChain } from 'wagmi';
 import type { TileData, SeasonInfo } from '../types';
+import { ACHIEVEMENTS, getUnlockedAchievements, type GameStats } from '../utils/achievementUtils';
 import {
   generateInitialTiles,
   move,
@@ -19,6 +20,8 @@ import { getAbiForVersion } from '../constants/contract';
 const BEST_SCORE_KEY = 'bestScore2048';
 const ANIMATION_DURATION = 200;
 const INITIAL_MOVES_HASH = '0x' + '0'.repeat(64);
+const STATS_KEY = 'melatonin_stats';
+const ACHIEVEMENTS_KEY = 'melatonin_achievements';
 
 export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | undefined) => {
   const [isInitializing, setIsInitializing] = useState(true);
@@ -36,7 +39,9 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
   const [hasSubmittedScore, setHasSubmittedScore] = useState(false);
   const [wasNewBestScore, setWasNewBestScore] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState('');
-  
+  const [stats, setStats] = useState<GameStats>({ maxTile: 0, totalGames: 0, totalUndos: 0, bestScore: 0 });
+  const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
+
   const tileIdCounterRef = useRef(1);
   const moveTimeoutRef = useRef<number | null>(null);
   const gameIdRef = useRef(0);
@@ -176,6 +181,13 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
   const newGame = useCallback(async () => {
     if (newGameLoadingRef.current) return;
 
+    // Update total games stat
+    setStats(prev => {
+      const next = { ...prev, totalGames: prev.totalGames + 1 };
+      localStorage.setItem(STATS_KEY, JSON.stringify(next));
+      return next;
+    });
+
     gameIdRef.current++;
     if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
 
@@ -313,6 +325,17 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
         await newGame();
       }
 
+      // Load stats and achievements
+      try {
+        const savedStats = localStorage.getItem(STATS_KEY);
+        if (savedStats) setStats(JSON.parse(savedStats));
+        
+        const savedAchievements = localStorage.getItem(ACHIEVEMENTS_KEY);
+        if (savedAchievements) setUnlockedAchievements(JSON.parse(savedAchievements));
+      } catch (e) {
+        console.error("Failed to load stats/achievements", e);
+      }
+
       setIsInitializing(false);
       
       setTimeout(() => {
@@ -340,7 +363,39 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
       setBestScore(score);
       localStorage.setItem(BEST_SCORE_KEY, score.toString());
     }
-  }, [score, bestScore]);
+
+    // Update maxTile and bestScore in stats
+    const maxTileValue = Math.max(...tiles.map(t => t.value), 0);
+    if (maxTileValue > stats.maxTile || score > stats.bestScore) {
+      setStats(prev => {
+        const next = {
+          ...prev,
+          maxTile: Math.max(prev.maxTile, maxTileValue),
+          bestScore: Math.max(prev.bestScore, score)
+        };
+        localStorage.setItem(STATS_KEY, JSON.stringify(next));
+        return next;
+      });
+    }
+  }, [score, bestScore, tiles, stats]);
+
+  // Check for achievements whenever stats change
+  useEffect(() => {
+    if (isInitializing) return;
+    const newlyUnlocked = getUnlockedAchievements(stats, unlockedAchievements);
+    if (newlyUnlocked.length > 0) {
+      const nextUnlocked = [...unlockedAchievements, ...newlyUnlocked.map(a => a.id)];
+      setUnlockedAchievements(nextUnlocked);
+      localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(nextUnlocked));
+      
+      newlyUnlocked.forEach(achievement => {
+        // @ts-ignore
+        if (typeof (window as any).appShowToast === 'function') {
+          (window as any).appShowToast(`Achievement Unlocked: ${achievement.title} ${achievement.icon}`, 'success');
+        }
+      });
+    }
+  }, [stats, unlockedAchievements, isInitializing]);
 
 
   const submitScore = useCallback(async () => {
@@ -536,6 +591,14 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
 
   const undo = useCallback(() => {
     if (isMoving || undoStack.length === 0) return;
+
+    // Track undo for achievements
+    setStats(prev => {
+      const next = { ...prev, totalUndos: prev.totalUndos + 1 };
+      localStorage.setItem(STATS_KEY, JSON.stringify(next));
+      return next;
+    });
+
     if (moveTimeoutRef.current) {
       clearTimeout(moveTimeoutRef.current);
       moveTimeoutRef.current = null;
@@ -638,5 +701,5 @@ export const useGameLogic = (isAppReady: boolean, activeSeason: SeasonInfo | und
     if (settings.undoDepth !== undefined) setUndoDepth(settings.undoDepth);
   };
 
-  return { tiles, score, bestScore, serverBestScore, isGameOver, isWon, newGame, handleKeyDown, performMove, submitScore, isSubmitting, hasSubmittedScore, wasNewBestScore, userRank, isInitializing, userAddress, submissionStatus, undo, undoAvailable, redo, redoAvailable, moves, undoDepth, setGlobalSettings };
+  return { tiles, score, bestScore, serverBestScore, isGameOver, isWon, newGame, handleKeyDown, performMove, submitScore, isSubmitting, hasSubmittedScore, wasNewBestScore, userRank, isInitializing, userAddress, submissionStatus, undo, undoAvailable, redo, redoAvailable, moves, undoDepth, setGlobalSettings, stats, unlockedAchievements };
 };

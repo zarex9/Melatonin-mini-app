@@ -1,12 +1,12 @@
 import React from 'react';
 
 interface TabsProps {
-  activeTab: 'mining' | 'stats';
-  onTabChange: (tab: 'mining' | 'stats') => void;
+  activeTab: 'mining' | 'stats' | 'achievements';
+  onTabChange: (tab: 'mining' | 'stats' | 'achievements') => void;
 }
 
 const Tabs: React.FC<TabsProps> = ({ activeTab, onTabChange }) => {
-  const getButtonClasses = (tabName: 'mining' | 'stats') => {
+  const getButtonClasses = (tabName: 'mining' | 'stats' | 'achievements') => {
     const baseClasses = 'w-full py-2 px-4 text-center font-bold rounded-md transition-colors duration-200';
     if (activeTab === tabName) {
       return `${baseClasses} bg-orange-500 text-white`;
@@ -29,6 +29,13 @@ const Tabs: React.FC<TabsProps> = ({ activeTab, onTabChange }) => {
         aria-pressed={activeTab === 'stats'}
       >
         STATS
+      </button>
+      <button
+        onClick={() => onTabChange('achievements')}
+        className={getButtonClasses('achievements')}
+        aria-pressed={activeTab === 'achievements'}
+      >
+        TROPHIES
       </button>
     </div>
   );

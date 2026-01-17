@@ -1,28 +1,13 @@
 import React from 'react';
 import type { TileData } from '../types';
+import { Theme } from '../constants/themes';
 
-const TILE_COLORS: { [key: number]: string } = {
-  2: 'bg-slate-200 text-slate-800',
-  4: 'bg-slate-300 text-slate-900',
-  8: 'bg-orange-300 text-white',
-  16: 'bg-orange-400 text-white',
-  32: 'bg-orange-500 text-white',
-  64: 'bg-red-500 text-white',
-  128: 'bg-yellow-400 text-white font-bold',
-  256: 'bg-yellow-500 text-white font-bold',
-  512: 'bg-yellow-600 text-white font-bold',
-  1024: 'bg-indigo-500 text-white font-extrabold',
-  2048: 'bg-indigo-700 text-white font-extrabold',
-  4096: 'bg-purple-600 text-white font-extrabold',
-  8192: 'bg-purple-800 text-white font-extrabold',
-  16384: 'bg-teal-500 text-white font-extrabold',
-  32768: 'bg-teal-700 text-white font-extrabold',
-  65536: 'bg-lime-500 text-white font-extrabold',
-  131072: 'bg-gray-900 text-white font-extrabold',
-};
+interface TileProps extends TileData {
+  theme: Theme;
+}
 
-const Tile: React.FC<TileData> = ({ value, row, col, isNew, isMerged }) => {
-  const colorClasses = TILE_COLORS[value] || 'bg-black text-white';
+const Tile: React.FC<TileProps> = ({ value, row, col, isNew, isMerged, theme }) => {
+  const colorClasses = theme.tileColors[value] || 'bg-black text-white';
   
   let animationClass = '';
   if (isNew) {
