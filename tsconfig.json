@@ -1,4 +1,4 @@
-i{
+{
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
@@ -19,17 +19,26 @@ i{
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
 
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@hooks/*": ["hooks/*"],
+      "@utils/*": ["utils/*"],
+      "@api/*": ["api/*"],
+      "@types/*": ["types/*"]
+    }
   },
 
   "include": [
-    "index.tsx",
-    "App.tsx",
-    "types.ts",
-    "components",
-    "hooks",
-    "utils",
-    "api"
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+
+  "exclude": [
+    "node_modules",
+    "dist"
   ],
 
   "references": [{ "path": "./tsconfig.node.json" }]
