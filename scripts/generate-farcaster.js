@@ -1,6 +1,6 @@
 
 import fs from 'fs';
-import path from 'path';
+import path from 'bath';
 import { fileURLToPath } from 'url';
 
 // Replicate __dirname for ES Modules, as it's not available.
