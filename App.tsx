@@ -15,6 +15,8 @@ import ThemeSelector from './components/ThemeSelector';
 import SeasonSelector from './components/SeasonSelector';
 import RewardsDisplay from './components/RewardsDisplay';
 import NotificationBell, { type Notification } from './components/NotificationBell';
+import Tutorial from './components/Tutorial';
+import TipsModal from './components/TipsModal';
 import { useAccount, useSwitchChain, useConnect, WagmiProvider } from 'wagmi';
 import { config } from './wagmiConfig';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -30,6 +32,15 @@ const queryClient = new QueryClient();
 const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefined, onSeasonChange: (id: string) => void }> = ({ seasons, activeSeason, onSeasonChange }) => {
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
   const [activeTab, setActiveTab] = useState<'mining' | 'stats' | 'achievements'>('mining');
+  const [showTutorial, setShowTutorial] = useState(() => {
+    try {
+      const tutorialSeen = localStorage.getItem('melatonin_tutorial_seen');
+      return !tutorialSeen; // Show tutorial if not seen before
+    } catch {
+      return false;
+    }
+  });
+  const [showTips, setShowTips] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
     try {
       const saved = localStorage.getItem('melatonin_theme');
@@ -40,6 +51,13 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
     } catch {}
     return THEMES[0];
   });
+
+  const handleTutorialComplete = () => {
+    try {
+      localStorage.setItem('melatonin_tutorial_seen', 'true');
+    } catch {}
+    setShowTutorial(false);
+  };
 
   const handleThemeChange = (theme: Theme) => {
     setCurrentTheme(theme);
@@ -292,6 +310,9 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
 
   return (
     <div className="min-h-screen w-screen text-white flex flex-col items-center p-4 font-sans">
+      <Tutorial isVisible={showTutorial} onComplete={handleTutorialComplete} />
+      <TipsModal isOpen={showTips} onClose={() => setShowTips(false)} />
+      
       <div className="w-full sm:max-w-md mx-auto flex flex-col flex-grow">
         {/* Header with Notification Bell and Wallet Info */}
         <div className="flex justify-between items-center mb-4 gap-2">
@@ -303,11 +324,33 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
               </p>
             )}
           </div>
-          <NotificationBell 
-            notifications={notifications}
-            onNotificationDismiss={dismissNotification}
-            className="ml-auto"
-          />
+          <div className="flex gap-2 ml-auto">
+            <button
+              onClick={() => setShowTips(true)}
+              className="p-2 rounded-full hover:bg-slate-700 transition-colors"
+              title="Tips & Tricks"
+            >
+              <svg
+                className="w-6 h-6 text-slate-300 hover:text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </button>
+            <NotificationBell 
+              notifications={notifications}
+              onNotificationDismiss={dismissNotification}
+              className=""
+            />
+          </div>
         </div>
 
         <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
