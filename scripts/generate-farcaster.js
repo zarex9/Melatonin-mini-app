@@ -14,9 +14,9 @@ const outputDir = path.dirname(outputPath);
 try {
   console.log('Starting farcaster.json generation...');
   
-  const allowedAddressesStr = process.env.VITE_ALLOWED_ADDRESSES;
+  const allowedAddressesStr = process.env.VITE_ALLOWED_ADDRESSES || '0x0000000000000000000000000000000000000000';
   if (!allowedAddressesStr) {
-    throw new Error('VITE_ALLOWED_ADDRESSES environment variable is not set.');
+    console.warn('⚠️  VITE_ALLOWED_ADDRESSES environment variable is not set. Using default address.');
   }
 
   const allowedAddresses = allowedAddressesStr.split(',').map(addr => addr.trim());
