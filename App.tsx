@@ -14,6 +14,7 @@ import Achievements from './components/Achievements';
 import ThemeSelector from './components/ThemeSelector';
 import SeasonSelector from './components/SeasonSelector';
 import RewardsDisplay from './components/RewardsDisplay';
+import NotificationBell, { type Notification } from './components/NotificationBell';
 import { useAccount, useSwitchChain, useConnect, WagmiProvider } from 'wagmi';
 import { config } from './wagmiConfig';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -45,7 +46,7 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
     localStorage.setItem('melatonin_theme', JSON.stringify({ id: theme.id }));
   };
   
-  const { isConnected, chain, status: wagmiStatus } = useAccount();
+  const { isConnected, chain, status: wagmiStatus, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
 
@@ -157,6 +158,42 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
   };
   const dismissToast = (id: string) => setToasts(t => t.filter(x => x.id !== id));
 
+  // Notifications
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const addNotification = (message: string, type: 'info' | 'success' | 'milestone' = 'info') => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    setNotifications(n => [...n, { id, message, type, timestamp: Date.now() }]);
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+      dismissNotification(id);
+    }, 10000);
+  };
+  const dismissNotification = (id: string) => setNotifications(n => n.filter(x => x.id !== id));
+
+  // Show notification when game over occurs
+  useEffect(() => {
+    if (isGameOver && score > 0) {
+      addNotification(`Game Over! Score: ${score}`, 'info');
+    }
+  }, [isGameOver, score]);
+
+  // Show notification when best score is updated
+  useEffect(() => {
+    if (wasNewBestScore && score > 0) {
+      addNotification(`🎉 New Best Score: ${score}!`, 'milestone');
+    }
+  }, [wasNewBestScore, score]);
+
+  // Show notification for new achievements
+  useEffect(() => {
+    if (unlockedAchievements && unlockedAchievements.length > 0) {
+      unlockedAchievements.forEach(achievement => {
+        addNotification(`Achievement Unlocked: ${achievement.name}`, 'success');
+      });
+    }
+  }, [unlockedAchievements]);
+
+
   if (!activeSeason) {
     return (
       <div className="flex-grow flex flex-col items-center justify-center">
@@ -256,6 +293,23 @@ const Game: React.FC<{ seasons: SeasonInfo[], activeSeason: SeasonInfo | undefin
   return (
     <div className="min-h-screen w-screen text-white flex flex-col items-center p-4 font-sans">
       <div className="w-full sm:max-w-md mx-auto flex flex-col flex-grow">
+        {/* Header with Notification Bell and Wallet Info */}
+        <div className="flex justify-between items-center mb-4 gap-2">
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold">Melatonin</h1>
+            {isConnected && address && (
+              <p className="text-xs text-slate-400">
+                {address.slice(0, 6)}...{address.slice(-4)}
+              </p>
+            )}
+          </div>
+          <NotificationBell 
+            notifications={notifications}
+            onNotificationDismiss={dismissNotification}
+            className="ml-auto"
+          />
+        </div>
+
         <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="flex flex-col w-full gap-2 mb-4">
           <div className="flex w-full gap-2 items-stretch">
